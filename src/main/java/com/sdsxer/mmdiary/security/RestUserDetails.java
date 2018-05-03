@@ -14,6 +14,10 @@ public class RestUserDetails implements UserDetails {
         this.user = user;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
@@ -21,31 +25,31 @@ public class RestUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.user.getPassword();
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return this.user.getAccount();
+        return user.getAccount();
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return user.isEnable();
     }
 }

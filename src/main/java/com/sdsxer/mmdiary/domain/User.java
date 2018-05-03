@@ -8,7 +8,7 @@ import javax.persistence.*;
 public class User {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private long id;
     private String account;
@@ -18,10 +18,8 @@ public class User {
     private String mobile;
     private short sex;
     private String avatar;
-//    @ManyToOne
-//    @JoinColumn(name = "role")
-//    @JsonIgnore
-//    private SystemRole role;
+    @JsonIgnore
+    private boolean enable;
 
     public long getId() {
         return id;
@@ -79,11 +77,11 @@ public class User {
         this.avatar = avatar;
     }
 
-//    public SystemRole getRole() {
-//        return role;
-//    }
-//
-//    public void setRole(SystemRole role) {
-//        this.role = role;
-//    }
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
 }

@@ -7,12 +7,13 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-public class User {
+public class User extends IdEntity {
 
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    private int id;
+    enum Status {
+        NORMAL,
+        FREEZE
+    }
+
     private String userId;
     private String username;
     private String nickname;
@@ -44,14 +45,6 @@ public class User {
 
     @ManyToMany
     private List<User> friends;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getNickname() {
         return nickname;

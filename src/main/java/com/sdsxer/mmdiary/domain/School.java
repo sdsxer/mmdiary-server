@@ -5,24 +5,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class School {
+public class School extends IdEntity {
 
-    @Id
-    @GeneratedValue
-    private int id;
     private String name;
     private int type; // 0x0001-Primary School，0x0010-Middle School
     private String location;
     private String telephone;
     private String zipCode;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

@@ -9,22 +9,10 @@ import javax.persistence.OneToMany;
 import java.util.List;
 
 @Entity
-public class Profession {
+public class Profession extends IdEntity {
 
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    private int id;
     private String name;
     private String alphabeticIndex;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

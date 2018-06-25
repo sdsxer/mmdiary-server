@@ -8,25 +8,13 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class EducationExperience {
+public class EducationExperience extends IdEntity {
 
-    @Id
-    @GeneratedValue
-    @JsonIgnore
-    private int id;
     @ManyToOne
     private School school;
     private int admissionYear;
     @ManyToOne
     private User user;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public School getSchool() {
         return school;

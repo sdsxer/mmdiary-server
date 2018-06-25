@@ -4,11 +4,8 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-public class Area {
+public class Area extends IdEntity {
 
-    @Id
-    @GeneratedValue
-    private int id;
     private String code;
     private String name;
     @ManyToOne
@@ -16,14 +13,6 @@ public class Area {
     @Transient
     private List<Area> children;
     private String fullPath;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getCode() {
         return code;

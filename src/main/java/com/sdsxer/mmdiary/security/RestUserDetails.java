@@ -30,7 +30,7 @@ public class RestUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getAccount();
+        return user.getUsername();
     }
 
     @Override
@@ -50,6 +50,6 @@ public class RestUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isEnable();
+        return user.getStatus() == 0;
     }
 }

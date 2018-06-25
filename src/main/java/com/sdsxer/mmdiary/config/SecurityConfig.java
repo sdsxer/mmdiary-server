@@ -45,14 +45,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.headers().frameOptions().disable();
 
-        http.authorizeRequests().antMatchers("/h2-console/*").permitAll();
-        http.authorizeRequests().antMatchers("/api/user/register").permitAll();
+//        http.authorizeRequests().antMatchers("/h2-console/*").permitAll();
+//        http.authorizeRequests().antMatchers("/api/user/register").permitAll();
+
+        http.authorizeRequests().antMatchers("*/*").permitAll();
 
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint());
 
         http.addFilter(loginFilter());
-        http.addFilter(authenticationFilter());
+//        http.addFilter(authenticationFilter());
     }
 
 
@@ -99,8 +101,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new RestAccessDeniedHandler();
     }
 
-    @Bean
-    public BasicAuthenticationFilter authenticationFilter() throws Exception {
-        return new RestAuthenticationFilter(authenticationManagerBean());
-    }
+//    @Bean
+//    public BasicAuthenticationFilter authenticationFilter() throws Exception {
+//        return new RestAuthenticationFilter(authenticationManagerBean());
+//    }
 }

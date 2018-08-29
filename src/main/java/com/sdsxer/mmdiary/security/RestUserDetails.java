@@ -1,17 +1,26 @@
 package com.sdsxer.mmdiary.security;
 
+import com.sdsxer.mmdiary.domain.SystemRole;
 import com.sdsxer.mmdiary.domain.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class RestUserDetails implements UserDetails {
 
     private User user;
+    private List<GrantedAuthority> grantedAuthorities;
 
     public RestUserDetails(User user) {
         this.user = user;
+        this.grantedAuthorities = new ArrayList<>();
+        GrantedAuthority authority = new SimpleGrantedAuthority(this.user.getRole() == null ?
+                SystemRole.USER : this.user.getRole().getName());
+        this.grantedAuthorities.add(authority);
     }
 
     public User getUser() {
@@ -20,7 +29,7 @@ public class RestUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return grantedAuthorities;
     }
 
     @Override
@@ -40,7 +49,7 @@ public class RestUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return user.getStatus() != User.Status.FREEZE.value();
     }
 
     @Override
@@ -50,6 +59,6 @@ public class RestUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus() == 0;
+        return user.getStatus() != User.Status.FREEZE.value();
     }
 }

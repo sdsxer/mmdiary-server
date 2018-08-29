@@ -3,12 +3,10 @@ package com.sdsxer.mmdiary;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
-/**
- * Application entrance
- * Created by leon on 2017/9/14.
- */
 @SpringBootApplication
+@EnableCaching
 public class MMDiaryApplication {
 
   public static void main(String[] args) {

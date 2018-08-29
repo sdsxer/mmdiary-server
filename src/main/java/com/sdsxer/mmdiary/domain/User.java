@@ -1,50 +1,108 @@
 package com.sdsxer.mmdiary.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sdsxer.mmdiary.domain.common.Area;
+import com.sdsxer.mmdiary.domain.user.EducationExperience;
+import com.sdsxer.mmdiary.domain.user.Profession;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-public class User extends IdEntity {
+public class User {
 
-    enum Status {
-        NORMAL,
-        FREEZE
+    public enum Status {
+        FREEZE(0), NORMAL(1);
+
+        int value;
+
+        Status(int value) {
+            this.value = value;
+        }
+
+        public int value() {
+            return value;
+        }
     }
 
-    private String userId;
+    enum Sex {
+        UNKNOWN(0), MALE(1), FEMALE(2);
+
+        int value;
+
+        Sex(int value) {
+            this.value = value;
+        }
+
+        public int value() {
+            return value;
+        }
+    }
+
+    @JsonIgnore
+    @Id
+    @GeneratedValue
+    private long id;
+    @Column(nullable = false)
     private String username;
     private String nickname;
     @JsonIgnore
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String mobile;
     private String email;
+    @Column(columnDefinition = "integer default 0")
     private int sex;
     private Date birthday;
     private String avatarUrl;
     @JsonIgnore
+    @Column(columnDefinition = "integer default 1")
     private int status;
     @JsonIgnore
+    @Column(columnDefinition = "timestamp default CURRENT_TIMESTAMP")
     private Date createTime;
     @JsonIgnore
     private Date lastModifyTime;
 
+    @JsonIgnore
     @OneToMany
     private List<EducationExperience> educationExperiences;
 
+    @JsonIgnore
     @ManyToOne
     private Area hometown;
 
+    @JsonIgnore
     @ManyToOne
     private Area residence;
 
+    @JsonIgnore
     @ManyToOne
     private Profession profession;
 
+    @JsonIgnore
     @ManyToMany
     private List<User> friends;
+
+    @JsonIgnore
+    @ManyToOne
+    private SystemRole role;
+
+    public User() {
+        createTime = new Date();
+        sex = Sex.UNKNOWN.value;
+        status = Status.NORMAL.value;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getNickname() {
         return nickname;
@@ -84,14 +142,6 @@ public class User extends IdEntity {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     public int getStatus() {
@@ -180,5 +230,17 @@ public class User extends IdEntity {
 
     public void setFriends(List<User> friends) {
         this.friends = friends;
+    }
+
+    public SystemRole getRole() {
+        return role;
+    }
+
+    public void setRole(SystemRole role) {
+        this.role = role;
+    }
+
+    public UserToken token() {
+        return new UserToken(id, username, role.getId());
     }
 }

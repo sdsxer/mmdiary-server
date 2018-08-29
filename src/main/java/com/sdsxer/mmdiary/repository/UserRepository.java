@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     User getByUsername(String username);
+
+    User getByMobile(String mobile);
 }

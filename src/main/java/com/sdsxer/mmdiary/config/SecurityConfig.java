@@ -1,19 +1,25 @@
 package com.sdsxer.mmdiary.config;
 
-import com.sdsxer.mmdiary.filter.RestAuthenticationFilter;
+import com.sdsxer.mmdiary.domain.SystemRole;
+import com.sdsxer.mmdiary.filter.RestTokenFilter;
 import com.sdsxer.mmdiary.filter.RestLoginFilter;
 import com.sdsxer.mmdiary.security.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.sdsxer.mmdiary.security.RestAccessDeniedHandler;
+import com.sdsxer.mmdiary.security.RestLoginFailureHandler;
+import com.sdsxer.mmdiary.security.RestLoginSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -23,86 +29,112 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private RestUserDetailsService restUserDetailsService;
-
-    @Autowired
-    protected void configureGlobal(AuthenticationManagerBuilder auth) {
+    // when using a different authentication system,
+    // and the password is not provided in your own database/data model,
+    // you have to use the AuthenticationProvider
+    // in another system, when storing the password in your own database,
+    // all you had to do was implementing the UserDetailsService and
+    // check if the user exists in your database or not, spring-security had to do the rest
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.userDetailsService(new RestUserDetailsService(userService));
         auth.authenticationProvider(authenticationProvider());
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(WebSecurity web) {
+        web.ignoring().antMatchers("/**/*.html");
+        web.ignoring().antMatchers("/**/*.css");
+        web.ignoring().antMatchers("/**/*.js");
+        web.ignoring().antMatchers("/**/*.ico");
+        web.ignoring().antMatchers("/**/*.png");
+        web.ignoring().antMatchers("/**/*.jpg");
+        web.ignoring().antMatchers("/**/*.jpeg");
+        web.ignoring().antMatchers("/**/*.gif");
+        web.ignoring().antMatchers("/h2-console/*");
+        web.ignoring().antMatchers(HttpMethod.POST, "/api/user/register");
+        web.ignoring().antMatchers(HttpMethod.GET, "/api/*/get");
+        web.ignoring().antMatchers(HttpMethod.GET,"/api/*/list");
+    }
 
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.headers().frameOptions().disable();
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.formLogin().disable();
+        http.httpBasic().disable();
+        http.logout().disable();
+        http.rememberMe().disable();
 
-//        http.authorizeRequests().antMatchers("/h2-console/*").permitAll();
-//        http.authorizeRequests().antMatchers("/api/user/register").permitAll();
-
-        http.authorizeRequests().antMatchers("*/*").permitAll();
+        http.authorizeRequests()
+                .antMatchers("/api/*/add", "/api/*/update",
+                        "/api/*/delete", "/api/*/revoke", "/api/*/release").hasRole(SystemRole.EDITOR)
+                .antMatchers("/api/user/me").authenticated()
+                .anyRequest().permitAll();
 
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint());
 
-        http.addFilter(loginFilter());
-//        http.addFilter(authenticationFilter());
-    }
-
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(restUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
+        http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAt(tokenFilter(), BasicAuthenticationFilter.class);
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public UserDetailsService restUserDetailsService() {
+        return new RestUserDetailsService();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setHideUserNotFoundExceptions(false);
+        daoAuthenticationProvider.setUserDetailsService(restUserDetailsService());
+        return daoAuthenticationProvider;
+    }
+
+    private PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
     }
 
-    @Bean
-    public UsernamePasswordAuthenticationFilter loginFilter() throws Exception {
+//    @Bean
+    private UsernamePasswordAuthenticationFilter loginFilter() throws Exception {
         RestLoginFilter loginFilter = new RestLoginFilter();
         loginFilter.setFilterProcessesUrl("/api/user/login");
-        loginFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler());
-        loginFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
-        loginFilter.setAuthenticationManager(authenticationManagerBean());
+        loginFilter.setAuthenticationSuccessHandler(loginSuccessHandler());
+        loginFilter.setAuthenticationFailureHandler(loginFailureHandler());
+        loginFilter.setAuthenticationManager(authenticationManager());
         return loginFilter;
     }
 
-    @Bean
-    public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return new RestAuthenticationSuccessHandler();
-    }
-
-    @Bean
-    public AuthenticationFailureHandler authenticationFailureHandler() {
-        return new RestAuthenticationFailureHandler();
-    }
-
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return new RestAuthenticationEntryPoint();
-    }
-
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler() {
-        return new RestAccessDeniedHandler();
+//    @Bean
+    private BasicAuthenticationFilter tokenFilter() throws Exception {
+        return new RestTokenFilter(authenticationManager());
     }
 
 //    @Bean
-//    public BasicAuthenticationFilter authenticationFilter() throws Exception {
-//        return new RestAuthenticationFilter(authenticationManagerBean());
-//    }
+    private AuthenticationSuccessHandler loginSuccessHandler() {
+        return new RestLoginSuccessHandler();
+    }
+
+//    @Bean
+    private AuthenticationFailureHandler loginFailureHandler() {
+        return new RestLoginFailureHandler();
+    }
+
+//    @Bean
+    private AuthenticationEntryPoint authenticationEntryPoint() {
+        return new RestAuthenticationEntryPoint();
+    }
+
+//    @Bean
+    private AccessDeniedHandler accessDeniedHandler() {
+        return new RestAccessDeniedHandler();
+    }
+
 }

@@ -1,20 +1,17 @@
 package com.sdsxer.mmdiary.common;
 
-import com.sdsxer.mmdiary.exception.BadRequestException;
-import com.sdsxer.mmdiary.exception.BaseException;
-import com.sdsxer.mmdiary.exception.PasswordErrorException;
-import com.sdsxer.mmdiary.exception.UserNotExistException;
+import com.sdsxer.mmdiary.exception.*;
+import com.sdsxer.mmdiary.response.RestResponse;
+import com.sdsxer.mmdiary.utils.ExceptionUtils;
 import com.sdsxer.mmdiary.utils.ResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,60 +20,76 @@ public class GlobalExceptionHandler {
 
     private Logger logger = LoggerFactory.getLogger("GlobalExceptionHandler");
 
-
-    @ExceptionHandler({ AuthenticationException.class })
+    @ExceptionHandler({AuthenticationException.class})
     public RestResponse handleAccessDeniedException(HttpServletRequest request, Exception e) {
+        if(e instanceof UsernameNotFoundException) {
+            return ResponseUtils.createErrorResponse(SystemError.UserNotExist);
+        }
+        else if(e instanceof BadCredentialsException) {
+            if(e.getCause() instanceof UsernameFormatException) {
+                return ResponseUtils.createErrorResponse(SystemError.UsernameFormatError);
+            }
+            else if(e.getCause() instanceof PasswordFormatException) {
+                return ResponseUtils.createErrorResponse(SystemError.PasswordFormatError);
+            }
+            else if(e.getCause() instanceof InvalidLoginInfoException) {
+                return ResponseUtils.createErrorResponse(SystemError.InvalidLoginInfo);
+            }
+            else if(e.getCause() instanceof InvalidTokenException) {
+                return ResponseUtils.createErrorResponse(SystemError.InvalidToken);
+            }
+        }
+        else if(e instanceof AuthenticationCredentialsNotFoundException) {
+            return ResponseUtils.createErrorResponse(SystemError.TokenNotFound);
+        }
+        else {
+
+        }
         return null;
     }
 
-    @ExceptionHandler(value = {
-            BadCredentialsException.class,
-            MethodArgumentNotValidException.class,
-            BadRequestException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public RestResponse badRequestErrorHandler(HttpServletRequest request, Exception e) {
-        logger.error("{} Handler: Host {} invokes url {} ERROR: {}", e.getClass().getSimpleName(),
-                request.getRemoteHost(), request.getRequestURL(), e.getMessage());
-        RestResponse response = ResponseUtils.createErrorRestResponse(ErrorCode.BAD_REQUEST);
-        if(e instanceof MethodArgumentNotValidException) {
-            BindingResult bindingResult = ((MethodArgumentNotValidException) e).getBindingResult();
-            response.setMessage(bindingResult.getFieldError().getDefaultMessage());
-        }
-        return response;
-    }
+//    @ExceptionHandler(value = {
+//            BadCredentialsException.class,
+//            MethodArgumentNotValidException.class,
+//            BadRequestException.class})
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ResponseBody
+//    public RestResponse badRequestErrorHandler(HttpServletRequest request, Exception e) {
+//        logger.error("{} Handler: Host {} invokes url {} ERROR: {}", e.getClass().getSimpleName(),
+//                request.getRemoteHost(), request.getRequestURL(), e.getMessage());
+//        RestResponse response = ResponseUtils.createErrorRestResponse(ErrorCode.BAD_REQUEST);
+//        if(e instanceof MethodArgumentNotValidException) {
+//            BindingResult bindingResult = ((MethodArgumentNotValidException) e).getBindingResult();
+//            response.setMessage(bindingResult.getFieldError().getDefaultMessage());
+//        }
+//        return response;
+//    }
 
+
+    // 404
     @ExceptionHandler(value = NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public RestResponse noHandlerFoundErrorHandler(HttpServletRequest request, Exception e) {
-        logger.error("NoHandlerFoundException Handler: Host {} invokes url {} ERROR: {}",
-                request.getRemoteHost(), request.getRequestURL(), e.getMessage());
-        return ResponseUtils.createErrorRestResponse(ErrorCode.NOT_FOUND);
+        return ResponseUtils.createErrorResponse(SystemError.NotFound, request.getServletPath());
     }
 
+    // 500
     @ExceptionHandler(value = BaseException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public RestResponse baseErrorHandler(HttpServletRequest req, Exception e) {
-        logger.error("BaseException Handler: Host {} invokes url {} ERROR: {}", req.getRemoteHost(), req.getRequestURL(), e.getMessage());
-        int code = ErrorCode.UNKNOWN_ERROR;
-        if(e instanceof UserNotExistException) {
-            code = ErrorCode.USER_NOT_EXIST;
-        }
-        else if(e instanceof PasswordErrorException) {
-            code = ErrorCode.PASSWORD_ERROR;
-        }
-        return ResponseUtils.createErrorRestResponse(code);
+    public RestResponse baseErrorHandler(HttpServletRequest request, Exception e) {
+        logger.error("BaseExceptionHandler: Host {} invokes url {} ERROR: {}",
+                request.getRemoteHost(), request.getRequestURL(), ExceptionUtils.printStackTraceToString(e));
+        return ResponseUtils.createErrorResponse(SystemError.UnknownError, ExceptionUtils.printStackTraceToString(e));
     }
 
-
+    // 500
     @ExceptionHandler(value = Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public RestResponse defaultErrorHandler(HttpServletRequest request, Exception e) {
-        logger.error("DefaultException Handler: Host {} invokes url {} ERROR: {}",
-                request.getRemoteHost(), request.getRequestURL(), e.getMessage());
-        return ResponseUtils.createErrorRestResponse(e);
+        logger.error("DefaultExceptionHandler: Host {} invokes url {} ERROR: {}",
+                request.getRemoteHost(), request.getRequestURL(), ExceptionUtils.printStackTraceToString(e));
+        return ResponseUtils.createErrorResponse(SystemError.UnknownError, ExceptionUtils.printStackTraceToString(e));
     }
 }

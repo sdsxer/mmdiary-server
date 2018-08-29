@@ -1,5 +1,8 @@
 package com.sdsxer.mmdiary.domain;
 
+import com.sdsxer.mmdiary.domain.base.IdEntity;
+import com.sdsxer.mmdiary.domain.common.Comment;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;

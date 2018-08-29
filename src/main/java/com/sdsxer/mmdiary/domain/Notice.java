@@ -1,8 +1,8 @@
 package com.sdsxer.mmdiary.domain;
 
+import com.sdsxer.mmdiary.domain.base.IdEntity;
+
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import java.util.Date;
 
 @Entity
@@ -10,8 +10,10 @@ public class Notice extends IdEntity {
 
     private String title;
     private String content;
-    private Date publishTime;
+    private Date createTime;
+    private Date releaseTime;
     private Date lastModifyTime;
+    private Date revokeTime;
     private int status;
 
     public String getTitle() {
@@ -30,12 +32,12 @@ public class Notice extends IdEntity {
         this.content = content;
     }
 
-    public Date getPublishTime() {
-        return publishTime;
+    public Date getReleaseTime() {
+        return releaseTime;
     }
 
-    public void setPublishTime(Date publishTime) {
-        this.publishTime = publishTime;
+    public void setReleaseTime(Date releaseTime) {
+        this.releaseTime = releaseTime;
     }
 
     public Date getLastModifyTime() {
@@ -52,5 +54,21 @@ public class Notice extends IdEntity {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getRevokeTime() {
+        return revokeTime;
+    }
+
+    public void setRevokeTime(Date revokeTime) {
+        this.revokeTime = revokeTime;
     }
 }

@@ -1,13 +1,14 @@
-package com.sdsxer.mmdiary.domain.common;
-
-import com.sdsxer.mmdiary.domain.base.IdEntity;
+package com.sdsxer.mmdiary.domain;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
-public class Area extends IdEntity {
+public class Area {
 
+    @Id
+    @GeneratedValue
+    private int id;
     private String code;
     private String name;
     @ManyToOne
@@ -15,6 +16,14 @@ public class Area extends IdEntity {
     @Transient
     private List<Area> children;
     private String fullPath;
+
+    private void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 
     public String getCode() {
         return code;

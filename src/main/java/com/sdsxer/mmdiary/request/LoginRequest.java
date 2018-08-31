@@ -1,7 +1,7 @@
 package com.sdsxer.mmdiary.request;
 
-import com.sdsxer.mmdiary.exception.PasswordFormatException;
-import com.sdsxer.mmdiary.exception.UsernameFormatException;
+import com.sdsxer.mmdiary.exception.MalformedPasswordException;
+import com.sdsxer.mmdiary.exception.MalformedUsernameException;
 import org.springframework.util.StringUtils;
 
 import javax.validation.Valid;
@@ -44,12 +44,12 @@ public class LoginRequest {
         this.password = password;
     }
 
-    public void checkLegality() throws UsernameFormatException, PasswordFormatException {
+    public void checkLegality() throws MalformedUsernameException, MalformedPasswordException {
         if(StringUtils.isEmpty(username)) {
-            throw new UsernameFormatException("用户名不能为空");
+            throw new MalformedUsernameException("用户名不能为空");
         }
         if(StringUtils.isEmpty(password)) {
-            throw new PasswordFormatException("密码不能为空");
+            throw new MalformedPasswordException("密码不能为空");
         }
     }
 }

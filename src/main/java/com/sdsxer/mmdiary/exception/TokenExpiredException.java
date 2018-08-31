@@ -1,5 +1,10 @@
 package com.sdsxer.mmdiary.exception;
 
-public class TokenExpiredException extends AuthenticationException {
+import org.springframework.security.authentication.BadCredentialsException;
 
+public class TokenExpiredException extends BadCredentialsException {
+
+    public TokenExpiredException(String msg) {
+        super(msg);
+    }
 }

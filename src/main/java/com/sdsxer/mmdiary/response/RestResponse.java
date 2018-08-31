@@ -20,6 +20,7 @@ public class RestResponse<T> implements Serializable {
         this.status = true;
         this.code = SystemError.Success.getCode();
         this.message = SystemError.Success.getMessage();
+        this.data = data;
     }
 
     // error

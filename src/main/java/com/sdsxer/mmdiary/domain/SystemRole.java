@@ -1,6 +1,7 @@
 package com.sdsxer.mmdiary.domain;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,6 +19,10 @@ public class SystemRole {
 
     @ManyToMany
     private List<SystemPrivilege> privileges;
+
+    public SystemRole() {
+        privileges = new ArrayList<>();
+    }
 
     public int getId() {
         return id;

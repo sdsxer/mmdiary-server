@@ -1,5 +1,6 @@
 package com.sdsxer.mmdiary.config;
 
+import com.sdsxer.mmdiary.common.SystemEnvironment;
 import com.sdsxer.mmdiary.domain.SystemRole;
 import com.sdsxer.mmdiary.filter.RestTokenFilter;
 import com.sdsxer.mmdiary.filter.RestLoginFilter;
@@ -7,8 +8,10 @@ import com.sdsxer.mmdiary.security.*;
 import com.sdsxer.mmdiary.security.RestAccessDeniedHandler;
 import com.sdsxer.mmdiary.security.RestLoginFailureHandler;
 import com.sdsxer.mmdiary.security.RestLoginSuccessHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,6 +36,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private Environment environment;
+
     // when using a different authentication system,
     // and the password is not provided in your own database/data model,
     // you have to use the AuthenticationProvider
@@ -41,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // check if the user exists in your database or not, spring-security had to do the rest
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(new RestUserDetailsService(userService));
+//        auth.userDetailsService(restUserDetailsService()).passwordEncoder(passwordEncoder());
         auth.authenticationProvider(authenticationProvider());
     }
 
@@ -99,10 +105,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private PasswordEncoder passwordEncoder() {
+        if(environment.getActiveProfiles()[0].equals(SystemEnvironment.DEV)) {
+            return NoOpPasswordEncoder.getInstance();
+        }
+        else if(environment.getActiveProfiles()[0].equals(SystemEnvironment.QA)) {
+            return new BCryptPasswordEncoder();
+        }
+        else if(environment.getActiveProfiles()[0].equals(SystemEnvironment.PROD)) {
+            return new BCryptPasswordEncoder();
+        }
         return NoOpPasswordEncoder.getInstance();
     }
 
-//    @Bean
     private UsernamePasswordAuthenticationFilter loginFilter() throws Exception {
         RestLoginFilter loginFilter = new RestLoginFilter();
         loginFilter.setFilterProcessesUrl("/api/user/login");
@@ -112,29 +126,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return loginFilter;
     }
 
-//    @Bean
-    private BasicAuthenticationFilter tokenFilter() throws Exception {
+    @Bean
+    public BasicAuthenticationFilter tokenFilter() throws Exception {
         return new RestTokenFilter(authenticationManager());
     }
 
-//    @Bean
-    private AuthenticationSuccessHandler loginSuccessHandler() {
+    @Bean
+    public AuthenticationSuccessHandler loginSuccessHandler() {
         return new RestLoginSuccessHandler();
     }
 
-//    @Bean
-    private AuthenticationFailureHandler loginFailureHandler() {
+    @Bean
+    public AuthenticationFailureHandler loginFailureHandler() {
         return new RestLoginFailureHandler();
     }
 
-//    @Bean
     private AuthenticationEntryPoint authenticationEntryPoint() {
         return new RestAuthenticationEntryPoint();
     }
 
-//    @Bean
     private AccessDeniedHandler accessDeniedHandler() {
         return new RestAccessDeniedHandler();
     }
-
 }

@@ -1,5 +1,10 @@
 package com.sdsxer.mmdiary.exception;
 
-public class InvalidLoginInfoException extends AuthenticationException {
+import org.springframework.security.authentication.BadCredentialsException;
 
+public class InvalidLoginInfoException extends BadCredentialsException {
+
+    public InvalidLoginInfoException(String msg) {
+        super(msg);
+    }
 }

@@ -2,40 +2,35 @@ package com.sdsxer.mmdiary.cache;
 
 import com.sdsxer.mmdiary.domain.User;
 import com.sdsxer.mmdiary.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
-@CacheConfig(cacheNames = {"user"})
+@CacheConfig(cacheNames = "users")
 @Repository
-public class UserCacheManager implements CacheManager<Long, User> {
+public class UserCacheManager implements CacheManager<String, User> {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    public UserCacheManager(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    @CachePut(key = "#username")
+    @Override
+    public User put(String username, User user) {
+        return user;
     }
 
-    @CachePut(key = "#p0")
+    @Cacheable(key = "#username")
     @Override
-    public void put(Long id, User user) {
-
+    public User get(String username) {
+        return userRepository.findByUsername(username);
     }
 
-    @Cacheable(key = "#p0")
+    @CacheEvict(key = "#username")
     @Override
-    public User get(Long id) {
-        Optional<User> userOptional = userRepository.findById(id);
-        return userOptional.isPresent() ? userOptional.get() : null;
-    }
-
-    @CacheEvict(key = "#p0")
-    @Override
-    public void delete(Long id) {
+    public void delete(String username) {
 
     }
 }

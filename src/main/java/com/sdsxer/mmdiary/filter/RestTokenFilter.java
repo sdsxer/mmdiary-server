@@ -1,17 +1,19 @@
 package com.sdsxer.mmdiary.filter;
 
+import com.sdsxer.mmdiary.cache.UserCacheManager;
 import com.sdsxer.mmdiary.domain.User;
-import com.sdsxer.mmdiary.domain.UserToken;
 import com.sdsxer.mmdiary.exception.TokenNotFoundException;
 import com.sdsxer.mmdiary.security.RestUserDetails;
-import com.sdsxer.mmdiary.service.UserService;
 import com.sdsxer.mmdiary.token.TokenManager;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -23,11 +25,13 @@ import java.io.IOException;
 
 public class RestTokenFilter extends BasicAuthenticationFilter {
 
+    private Logger logger = LoggerFactory.getLogger(RestTokenFilter.class.getSimpleName());
+
     @Autowired
     private TokenManager tokenManager;
 
     @Autowired
-    private UserService userService;
+    private UserCacheManager userCacheManager;
 
     public RestTokenFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
@@ -38,11 +42,14 @@ public class RestTokenFilter extends BasicAuthenticationFilter {
             , FilterChain chain) throws IOException, ServletException {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
         if(StringUtils.isEmpty(token)) {
-            throw new TokenNotFoundException();
+            throw new TokenNotFoundException(null);
         }
         try{
-            UserToken userToken = tokenManager.parseToken(token);
-            User user = userService.findUserByAccount(userToken.getUsername());
+            String username = tokenManager.parseToken(token);
+            User user = userCacheManager.get(username);
+            if(user == null) {
+                throw new UsernameNotFoundException(username);
+            }
             RestUserDetails userDetails = new RestUserDetails(user);
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

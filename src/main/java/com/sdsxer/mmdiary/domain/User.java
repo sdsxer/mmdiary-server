@@ -1,11 +1,10 @@
 package com.sdsxer.mmdiary.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sdsxer.mmdiary.domain.common.Area;
-import com.sdsxer.mmdiary.domain.user.EducationExperience;
-import com.sdsxer.mmdiary.domain.user.Profession;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +12,7 @@ import java.util.List;
 public class User {
 
     public enum Status {
-        FREEZE(0), NORMAL(1);
+        NORMAL(0), DISABLED(1), LOCKED(2);
 
         int value;
 
@@ -43,57 +42,59 @@ public class User {
     @JsonIgnore
     @Id
     @GeneratedValue
-    private long id;
+    protected long id;
     @Column(nullable = false)
-    private String username;
+    protected String username;
     private String nickname;
     @JsonIgnore
     @Column(nullable = false)
-    private String password;
+    protected String password;
     @Column(nullable = false)
-    private String mobile;
+    protected String mobile;
     private String email;
     @Column(columnDefinition = "integer default 0")
     private int sex;
     private Date birthday;
     private String avatarUrl;
     @JsonIgnore
-    @Column(columnDefinition = "integer default 1")
-    private int status;
+    @Column(columnDefinition = "integer default 0")
+    protected int status;
     @JsonIgnore
     @Column(columnDefinition = "timestamp default CURRENT_TIMESTAMP")
     private Date createTime;
     @JsonIgnore
     private Date lastModifyTime;
 
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @OneToMany
     private List<EducationExperience> educationExperiences;
 
-    @JsonIgnore
-    @ManyToOne
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Area hometown;
 
-    @JsonIgnore
-    @ManyToOne
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Area residence;
 
-    @JsonIgnore
-    @ManyToOne
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Profession profession;
 
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @ManyToMany
     private List<User> friends;
 
     @JsonIgnore
     @ManyToOne
-    private SystemRole role;
+    protected SystemRole role;
 
     public User() {
         createTime = new Date();
         sex = Sex.UNKNOWN.value;
         status = Status.NORMAL.value;
+        educationExperiences = new ArrayList<>();
+        friends = new ArrayList<>();
     }
 
     public long getId() {
@@ -238,9 +239,5 @@ public class User {
 
     public void setRole(SystemRole role) {
         this.role = role;
-    }
-
-    public UserToken token() {
-        return new UserToken(id, username, role.getId());
     }
 }

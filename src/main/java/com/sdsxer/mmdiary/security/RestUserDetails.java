@@ -49,7 +49,7 @@ public class RestUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return user.getStatus() != User.Status.FREEZE.value();
+        return user.getStatus() != User.Status.LOCKED.value();
     }
 
     @Override
@@ -59,6 +59,6 @@ public class RestUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus() != User.Status.FREEZE.value();
+        return user.getStatus() != User.Status.DISABLED.value();
     }
 }

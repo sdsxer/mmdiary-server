@@ -2,9 +2,9 @@ package com.sdsxer.mmdiary.exception;
 
 import org.springframework.security.authentication.BadCredentialsException;
 
-public class PasswordErrorException extends BadCredentialsException {
+public class MalformedUsernameException extends BadCredentialsException {
 
-    public PasswordErrorException(String message) {
+    public MalformedUsernameException(String message) {
         super(message);
     }
 }

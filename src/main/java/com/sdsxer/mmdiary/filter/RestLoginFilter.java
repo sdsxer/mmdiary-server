@@ -2,11 +2,11 @@ package com.sdsxer.mmdiary.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sdsxer.mmdiary.exception.InvalidLoginInfoException;
-import com.sdsxer.mmdiary.exception.PasswordFormatException;
-import com.sdsxer.mmdiary.exception.UsernameFormatException;
+import com.sdsxer.mmdiary.exception.LoginInfoNotFoundException;
+import com.sdsxer.mmdiary.exception.MalformedPasswordException;
+import com.sdsxer.mmdiary.exception.MalformedUsernameException;
 import com.sdsxer.mmdiary.request.LoginRequest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -34,16 +34,16 @@ public class RestLoginFilter extends UsernamePasswordAuthenticationFilter {
                         loginRequest.getUsername(), loginRequest.getPassword());
                 setDetails(request, loginAuthToken);
             }
-            catch (UsernameFormatException | PasswordFormatException e) {
+            catch (MalformedUsernameException | MalformedPasswordException e) {
                 throw e;
             }
             catch (Exception e) {
-                throw new InvalidLoginInfoException();
+                throw new InvalidLoginInfoException(null);
             }
             return getAuthenticationManager().authenticate(loginAuthToken);
         }
         else {
-            throw new InvalidLoginInfoException();
+            throw new LoginInfoNotFoundException(null);
         }
     }
 }

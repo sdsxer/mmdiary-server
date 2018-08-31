@@ -1,10 +1,8 @@
 package com.sdsxer.mmdiary.token;
 
 import com.sdsxer.mmdiary.common.SystemProperties;
-import com.sdsxer.mmdiary.domain.UserToken;
 import com.sdsxer.mmdiary.exception.*;
 import io.jsonwebtoken.*;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -12,7 +10,6 @@ import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
 import java.util.Date;
 
-@Component
 public class JwtTokenManager extends TokenManager {
 
     private final SystemProperties systemProperties;
@@ -26,11 +23,9 @@ public class JwtTokenManager extends TokenManager {
     }
 
     @Override
-    public String generateToken(UserToken userToken) {
+    public String generateToken(String username) {
         Claims claims = Jwts.claims();
-        claims.put(UserToken.KEY_USER_ID, userToken.getUserId());
-        claims.put(UserToken.KEY_USERNAME, userToken.getUsername());
-        claims.put(UserToken.KEY_ROLE_ID, userToken.getRoleId());
+        claims.setId(username);
         JwtBuilder builder = Jwts.builder();
         builder.setClaims(claims);
         builder.setExpiration(new Date(System.currentTimeMillis() + systemProperties.getTokenExpireTime() * 1000));
@@ -39,9 +34,9 @@ public class JwtTokenManager extends TokenManager {
     }
 
     @Override
-    public UserToken parseToken(String token) {
+    public String parseToken(String token) {
         if(StringUtils.isEmpty(token)) {
-            throw new TokenParseException();
+            throw new TokenParseException(token);
         }
         Claims claims;
         try{
@@ -51,20 +46,17 @@ public class JwtTokenManager extends TokenManager {
                     .getBody();
         }
         catch (ExpiredJwtException e) {
-            throw new TokenExpiredException();
+            throw new TokenExpiredException(token);
         }
         catch (SignatureException e) {
-            throw new TokenSignatureException();
+            throw new TokenSignatureException(token);
         }
         catch (MalformedJwtException e) {
-            throw new TokenFormatException();
+            throw new MalformedTokenException(token);
         }
         catch (Exception e) {
-            throw new InvalidTokenException();
+            throw new InvalidTokenException(token);
         }
-        UserToken userToken = new UserToken();
-        userToken.setUserId((Long) claims.get(UserToken.KEY_USER_ID));
-        userToken.setUsername((String) claims.get(UserToken.KEY_USERNAME));
-        return userToken;
+        return claims.getId();
     }
 }

@@ -1,17 +1,28 @@
-package com.sdsxer.mmdiary.domain.common;
-
-import com.sdsxer.mmdiary.domain.base.IdEntity;
+package com.sdsxer.mmdiary.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 @Entity
-public class School extends IdEntity {
+public class School {
 
+    @Id
+    @GeneratedValue
+    private int id;
     private String name;
     private int type; // 0x0001-Primary School，0x0010-Middle School
     private String location;
     private String telephone;
     private String zipCode;
+
+    private int getId() {
+        return id;
+    }
+
+    private void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

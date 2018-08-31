@@ -1,14 +1,11 @@
 package com.sdsxer.mmdiary.domain;
 
-import com.sdsxer.mmdiary.domain.base.IdEntity;
-import com.sdsxer.mmdiary.domain.common.Comment;
-
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
 @MappedSuperclass
-public abstract class Article extends IdEntity {
+public abstract class Article {
 
     enum Classify {
         NEWS,
@@ -22,6 +19,9 @@ public abstract class Article extends IdEntity {
         APPROVED
     }
 
+    @Id
+    @GeneratedValue
+    private int id;
     protected String title;
     protected String summary;
     protected String content;
@@ -37,6 +37,14 @@ public abstract class Article extends IdEntity {
     protected List<Comment> comments;
     protected int classify;
     protected int status;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;

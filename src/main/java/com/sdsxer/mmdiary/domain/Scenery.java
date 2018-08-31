@@ -1,10 +1,21 @@
 package com.sdsxer.mmdiary.domain;
 
-import com.sdsxer.mmdiary.domain.base.IdEntity;
-
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 @Entity
-public class Scenery extends IdEntity {
+public class Scenery {
 
+    @Id
+    @GeneratedValue
+    private int id;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

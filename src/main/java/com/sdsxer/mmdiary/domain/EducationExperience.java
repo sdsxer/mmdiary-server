@@ -1,20 +1,29 @@
-package com.sdsxer.mmdiary.domain.user;
-
-import com.sdsxer.mmdiary.domain.User;
-import com.sdsxer.mmdiary.domain.common.School;
-import com.sdsxer.mmdiary.domain.base.IdEntity;
+package com.sdsxer.mmdiary.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class EducationExperience extends IdEntity {
+public class EducationExperience {
 
+    @Id
+    @GeneratedValue
+    private int id;
     @ManyToOne
     private School school;
     private int admissionYear;
     @ManyToOne
     private User user;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public School getSchool() {
         return school;

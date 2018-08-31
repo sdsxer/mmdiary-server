@@ -32,19 +32,14 @@ public class ResponseUtils {
         return new RestResponse(SystemError.UnknownError, ExceptionUtils.printStackTraceToString(e));
     }
 
-    public static void createErrorResponse(HttpServletResponse response, SystemError error) {
+    public static void responseError(HttpServletResponse response, SystemError error) {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         RestResponse restResponse = createErrorResponse(error);
-        try {
-            responseJson(response, restResponse);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        responseJson(response, restResponse);
     }
 
-    public static void responseJson(HttpServletResponse response, Object data) throws Exception {
+    public static void responseJson(HttpServletResponse response, Object data) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(data);
@@ -54,7 +49,7 @@ public class ResponseUtils {
             outputStream.close();
         }
         catch (Exception e) {
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 }

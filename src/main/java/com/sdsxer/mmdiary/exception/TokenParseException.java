@@ -1,20 +1,10 @@
 package com.sdsxer.mmdiary.exception;
 
-public class TokenParseException extends AuthenticationException {
+import org.springframework.security.authentication.BadCredentialsException;
 
-    public TokenParseException() {
-        super();
-    }
+public class TokenParseException extends BadCredentialsException {
 
-    public TokenParseException(String message) {
-        super(message);
-    }
-
-    public TokenParseException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public TokenParseException(Throwable cause) {
-        super(cause);
+    public TokenParseException(String msg) {
+        super(msg);
     }
 }

@@ -1,14 +1,25 @@
-package com.sdsxer.mmdiary.domain.user;
-
-import com.sdsxer.mmdiary.domain.base.IdEntity;
+package com.sdsxer.mmdiary.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 @Entity
-public class Profession extends IdEntity {
+public class Profession {
 
+    @Id
+    @GeneratedValue
+    private int id;
     private String name;
     private String alphabeticIndex;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

@@ -1,5 +1,10 @@
 package com.sdsxer.mmdiary.exception;
 
-public class TokenSignatureException extends AuthenticationException {
+import org.springframework.security.authentication.BadCredentialsException;
 
+public class TokenSignatureException extends BadCredentialsException {
+
+    public TokenSignatureException(String msg) {
+        super(msg);
+    }
 }

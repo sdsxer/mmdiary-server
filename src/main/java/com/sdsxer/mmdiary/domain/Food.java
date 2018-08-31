@@ -1,10 +1,13 @@
 package com.sdsxer.mmdiary.domain;
 
-import com.sdsxer.mmdiary.domain.base.IdEntity;
-
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 @Entity
-public class Food extends IdEntity {
+public class Food {
 
+    @Id
+    @GeneratedValue
+    private int id;
 }

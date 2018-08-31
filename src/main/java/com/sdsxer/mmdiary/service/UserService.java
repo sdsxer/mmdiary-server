@@ -2,6 +2,7 @@ package com.sdsxer.mmdiary.service;
 
 import com.sdsxer.mmdiary.domain.User;
 import com.sdsxer.mmdiary.repository.UserRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,11 +14,11 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User findUserByAccount(String account) {
-        return userRepository.getByUsername(account);
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public User findUserByMobile(String mobile) {
-        return userRepository.getByMobile(mobile);
+        return userRepository.findByMobile(mobile);
     }
 }

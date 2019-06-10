@@ -1,2 +1,2 @@
 # mmdiary-server
-Java web server for HuXi project
+Java web server for mmdiary project
